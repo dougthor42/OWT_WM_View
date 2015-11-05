@@ -55,3 +55,6 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# General Ignore
+/owt_wm_view/mask_constants.py

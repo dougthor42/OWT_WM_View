@@ -1,0 +1,32 @@
+language: python
+
+sudo: false
+
+python:
+  - "3.4"
+
+notifications:
+  email: false
+
+before_install:
+  - echo "-----before_install-----"
+
+install:
+  - echo "-----install-----"
+  # Make sure I'm in the correct directory after all that before_install crap
+  - cd /home/travis/build/dougthor42/PyBank/
+
+  # Start the install of everything
+  - pip install --upgrade pip
+  - pip install http://dougthor42.github.io/tools/wxPython-3.0.3-cp34-cp34m-linux_x86_64.whl
+  - pip install -r dev-requirements.txt
+  - pip install coveralls
+  - pip install wheel
+  - pip install numpy
+
+script:
+  - green pybank -vv --run-coverage
+
+after_success:
+  # Send coverage information to coveralls.io
+  - coveralls
