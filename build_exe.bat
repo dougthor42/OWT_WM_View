@@ -1,12 +1,12 @@
 call C:\WinPython34_x64\Scripts\env.bat
-cd C:\WinPython34_x64\projects\github\PyBank
+cd C:\WinPython34_x64\projects\github\OWT_WM_View
 echo ----- Deleting previous build -----
-RMDIR /S /Q C:\WinPython34_x64\projects\github\PyBank\build\exe.win-amd64-3.4
+RMDIR /S /Q C:\WinPython34_x64\projects\github\OWT_WM_View\build\exe.win-amd64-3.4
 echo ----- Running build script -----
 python build_executables.py build
 echo ----- Launching Application -----
 cd .\build\exe.win-amd64-3.4\
-PyBank.exe
+"WM View.exe"
 cd ..\..
 echo ----- Finished -----
 @echo off

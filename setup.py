@@ -14,10 +14,10 @@ import logging
 # Third Party
 
 # Package / Application
-from pybank import (__version__,
-                    __project_url__,
-                    __project_name__,
-                    )
+from owt_wm_view import (__version__,
+                         __project_url__,
+                         __project_name__,
+                         )
 
 # turn off logging if we're going to build a distribution
 logging.disable(logging.CRITICAL)
@@ -25,7 +25,7 @@ logging.disable(logging.CRITICAL)
 setup(
     name=__project_name__,
     version=__version__,
-    description="Finance tracking software",
+    description="OWT Wafer Map Viewer",
     packages=find_packages(),
     author="Douglas Thor",
     url=__project_url__,
@@ -34,17 +34,12 @@ setup(
         "Environment :: Win32 (MS Windows)",
         "Environment :: X11 Applications",
         "Environment :: MacOS X",
-        "Intended Audience :: End Users/Desktop",
-        "Intended Audience :: Financial and Insurance Industry",
-        "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
         "Operating System :: Microsoft :: Windows",
         "Operating System :: MacOS :: MacOS X",
         "Operating System :: POSIX :: Linux",
         "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3 :: Only",
         "Programming Language :: Python :: Implementation :: CPython",
-        "Topic :: Office/Business :: Financial",
-        "Topic :: Office/Business :: Financial :: Accounting",
         "Topic :: Utilities",
         ],
     requires=["wxPython",

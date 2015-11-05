@@ -18,12 +18,12 @@ import glob
 from cx_Freeze import setup, Executable
 
 # Package / Application
-from pybank import (__version__,
-                    __project_url__,
-                    __project_name__,
-                    __description__,
-                    __long_descr__,
-                    )
+from owt_wm_view import (__version__,
+                         __project_url__,
+                         __project_name__,
+                         __description__,
+                         __long_descr__,
+                         )
 
 # ---------------------------------------------------------------------------
 ### General Setup
@@ -48,17 +48,12 @@ packages = [
 
 # included modules
 includes = [
-            "pybank/pbsql",
-            "pybank/plots",
-            "pybank/crypto",
-            "pybank/gui",
-#            "scipy/special/ufuncs_cxx",
-#            "scipy/special/ufuncs",
+            "owt_wm_view/mask_constants",
             ]
 
 # Files to include (and their destinations)
 include_files = [
-                 "pybank\\test_database.db",
+#                 "pybank\\test_database.db",
                  ("log\\README.txt", "log\\README.txt"),  # (source, dest)
 #                 ("C:\\WinPython34_x64\\python-3.4.3.amd64\\Lib\\site-packages\\scipy\\special\\_ufuncs.pyd", "_ufuncs.pyd"),
 #                 ("C:\\WinPython34_x64\\python-3.4.3.amd64\\Lib\\site-packages\\scipy\\special\\_ufuncs_cxx.pyd", "_ufuncs_cxx.pyd"),
@@ -114,7 +109,7 @@ build_exe_opts = {
 # ---------------------------------------------------------------------------
 ### Executable Definitions
 # ---------------------------------------------------------------------------
-file_to_build = "pybank\\main.py"
+file_to_build = "owt_wm_view\\owt_wafer_map_viewer.py"
 
 # Application Base
 base = None
@@ -123,7 +118,7 @@ base = None
 
 exe1 = Executable(file_to_build,
                   base=base,
-                  targetName="PyBank.exe",
+                  targetName="WMView.exe",
                   )
 
 # List of which executables to build.
