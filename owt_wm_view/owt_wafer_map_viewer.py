@@ -40,6 +40,7 @@ try:
     from . import mask_constants
     from . import (__project_name__,
                    __version__,
+                   __released__,
                    )
 #    logging.debug("Imports for UnitTests")
 except SystemError:
@@ -48,6 +49,7 @@ except SystemError:
         import mask_constants
         from __init__ import (__project_name__,
                               __version__,
+                              __released__,
                               )
 #        logging.debug("Imports for Spyder IDE")
     except ImportError:
@@ -55,6 +57,7 @@ except SystemError:
         from owt_wm_view import mask_constants
         from owt_wm_view import (__project_name__,
                                  __version__,
+                                 __released__,
                                  )
 #        logging.debug("imports for Executable")
 
@@ -63,7 +66,9 @@ except SystemError:
 ### Module Constants
 # ---------------------------------------------------------------------------
 MASK_PATH = "Z:\\Software\\LabView\\OWT\\masks"
-__window_title__ = "{} v{}".format(__project_name__, __version__)
+__window_title__ = "{} v{}   Released {}".format(__project_name__,
+                                                 __version__,
+                                                 __released__)
 
 # ---------------------------------------------------------------------------
 ### Classes
