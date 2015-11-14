@@ -13,12 +13,12 @@ import logging
 from logging.handlers import TimedRotatingFileHandler as TRFHandler
 
 ### Constants ###############################################################
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 __project_url__ = "https://github.com/dougthor42/OWT_WM_View"
 __project_name__ = "OWT Wafer Map Viewer"
-__description__ = "Finance tracking software"
+__description__ = "Wafer Map Viewer and Editor for the Transphorm OWT program."
 __long_descr__ = __doc__
-__released__ = "2015-11-12"
+__released__ = "2015-11-13"
 
 LOG_LEVEL_BASE = logging.DEBUG
 LOG_LEVEL_FILE = LOG_LEVEL_BASE

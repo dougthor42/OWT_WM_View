@@ -31,8 +31,10 @@ import numpy as np
 import wafer_map.wm_core as wm_core
 import wafer_map.gen_fake_data as gen_fake_data
 import wafer_map.wm_info as wm_info
+import wafer_map.wm_utils as wm_utils
 import wx
 import wx.lib.plot as wxplot
+from wx.lib.floatcanvas import FloatCanvas
 
 # Package / Application
 try:
@@ -309,7 +311,15 @@ class MainPanel(wx.Panel):
                                               xyd,
                                               wafer_info,
                                               data_type='discrete',
+                                              plot_die_centers=False,
                                               )
+        self.wafer_info = wafer_info
+        # Hack! FixMe!
+        self.mask_data = Mask("07G11")
+        self.mask_data.die_xy = wafer_info.die_size
+        self.mask_data.center_xy = wafer_info.center_xy
+        self.mask_data.dia = wafer_info.dia
+        self.read_mask_data(xyd)
 
         self.stats_block= StatsBlock(self)
 
@@ -343,18 +353,61 @@ class MainPanel(wx.Panel):
         # Bind events
         self._bind_events()
 
+    def read_mask_data(self, xyd=None):
+        """ Reads the mask data into the xyd format """
+        if xyd is None:
+            self.xyd = [(_c, _r, "Every") for _r, _c in self.wfrmap_data]
+        else:
+            self.xyd = xyd
+        self.xyd_dict = wm_core.xyd_to_dict(self.xyd)
+
+    def update_canvas(self):
+        # Create a new xyd list based on the mask
+        self.wafer_info = wm_info.WaferInfo(self.mask_data.die_xy,
+                                            self.mask_data.center_xy,
+                                            self.mask_data.dia,
+                                            4.5,
+                                            4.5)
+
+        # All these things just so that I can update the map...
+        self.wm_panel.canvas.InitAll()
+        self.wm_panel._clear_canvas()
+        self.wm_panel.die_size = self.mask_data.die_xy
+        self.wm_panel.xyd = self.xyd
+        self.wm_panel.wafer_info = self.wafer_info
+        self.wm_panel.grid_center = self.mask_data.center_xy
+        self.wm_panel.xyd_dict = self.xyd_dict
+        self.wm_panel._create_legend()
+        self.wm_panel.draw_die()
+        self.wm_panel.draw_die_center()
+        self.wm_panel.draw_wafer_objects()
+        self.wm_panel.zoom_fill()
+
+        self.stats_block.update_stats(self.xyd)
+
+        radius_sqrd_data = list(
+           (self.wafer_info.die_size[0] * (self.wafer_info.center_xy[0] - die[0]))**2
+           + (self.wafer_info.die_size[1] * (self.wafer_info.center_xy[1] - die[1]))**2
+           for die in self.xyd)
+        new_radius_data = list(math.sqrt(item) for item in radius_sqrd_data)
+        self.radius_plots.update(new_radius_data)
+
+        self.Refresh()
+        self.Update()
+
     def _bind_events(self):
         """ Binds events to various controls """
         self.mask_lb.Bind(wx.EVT_LISTBOX, self._on_mask_change)
         self.map_lb.Bind(wx.EVT_LISTBOX, self._on_map_change)
+        self.wm_panel.canvas.Bind(FloatCanvas.EVT_LEFT_UP, self._on_die_click)
 
     def _on_mask_change(self, event):
         """ Fires when user selects a different item in the Mask ListBox """
         mask = self.mask_lb.GetStringSelection()
         print("Mask Changed to: {}".format(mask))
-        self._update_maps(mask)
+        self._update_map_list(mask)
 
-    def _update_maps(self, mask):
+    def _update_map_list(self, mask):
         """
         Reads the mask file for the selected mask and updates the Map
         ListBox with all of the wafer maps. Assumes 150mm wafer.
@@ -376,43 +429,38 @@ class MainPanel(wx.Panel):
         # First, get the Every map and update the wafer map with it.
         map_name = self.map_lb.GetStringSelection()
         wfrmap = self.mask_data.maps[map_name]
+        self.wfrmap_data = wfrmap
+        self.read_mask_data()
         print("Map Changed to: {}".format(map_name))
-#        wfrmap = self.mask_data.maps['Every']
 
-        # Create a new xyd list based on the mask
-        self.xyd = [(_c, _r, "Every") for _r, _c in wfrmap]
-#        self.center_xy = (10, 10)
-        self.wafer_info = wm_info.WaferInfo(self.mask_data.die_xy,
-                                            self.mask_data.center_xy,
-                                            self.mask_data.dia,
-                                            4.5,
-                                            4.5)
+        self.update_canvas()
 
-        # All these things just so that I can update the map...
-        self.wm_panel.canvas.InitAll()
-        self.wm_panel._clear_canvas()
-        self.wm_panel.die_size = self.mask_data.die_xy
-        self.wm_panel.xyd = self.xyd
-        self.wm_panel.wafer_info = self.wafer_info
-        self.wm_panel.grid_center = self.mask_data.center_xy
-        self.wm_panel.xyd_dict = wm_core.xyd_to_dict(self.xyd)
-        self.wm_panel._create_legend()
-        self.wm_panel.draw_die()
-        self.wm_panel.draw_die_center()
-        self.wm_panel.draw_wafer_objects()
-        self.wm_panel.zoom_fill()
+    def _on_die_click(self, event):
+        """ Handle the left mouse click event """
+        # display the mouse coords on the Frame StatusBar
+        ds_x, ds_y = self.wm_panel.die_size
+        gc_x, gc_y = self.wm_panel.grid_center
+        dg_x, dg_y = wm_utils.coord_to_grid(event.Coords,
+                                            self.wm_panel.die_size,
+                                            self.wm_panel.grid_center,
+                                            )
 
-        self.stats_block.update_stats(self.xyd)
+        # lookup the die value
+        grid = "x{}y{}"
+        die_grid = grid.format(dg_x, dg_y)
+        self._add_remove_die(die_grid)
 
-        radius_sqrd_data = list(
-           (self.wafer_info.die_size[0] * (self.wafer_info.center_xy[0] - die[0]))**2
-           + (self.wafer_info.die_size[1] * (self.wafer_info.center_xy[1] - die[1]))**2
-           for die in self.xyd)
-        new_radius_data = list(math.sqrt(item) for item in radius_sqrd_data)
-        self.radius_plots.update(new_radius_data)
-
-        self.Refresh()
-        self.Update()
+    def _add_remove_die(self, grid_coord):
+        """ Add or remove a die from the xyd_dict """
+        try:
+            del self.xyd_dict[grid_coord]
+#            print("removed die {}".format(grid_coord))
+        except KeyError:
+#            # The die wasn't in the list, so instead we add it.
+            self.xyd_dict[grid_coord] = "Every"
+#            print("added die {}".format(grid_coord))
+        self.xyd = xyd_dict_to_xyd_tuple(self.xyd_dict)
+        self.update_canvas()
 
 
 class RadiusPlots(wx.Panel):
@@ -500,16 +548,19 @@ class Histogram(wxplot.PlotCanvas):
         self.x_label = x_label
         self.y_label = y_label
 
-#        self._init_data()
+        # get rid of that annoying crosshair cursor
+        self.canvas.SetCursor(wx.NullCursor)
+
+        self._init_data()
 
 #        self._init_ui()
-        self.update(self.data, self.binspec)
 
     def _init_ui(self):
         pass
 
     def _init_data(self):
-        pass
+        """ Initialize the data. Do any one-time operations here """
+        self.update(self.data, self.binspec)
 
     def update(self, data, binspec):
         self.Clear()
@@ -755,6 +806,12 @@ def dictpop(dictionary, item):
     retval = dictionary[item]
     del dictionary[item]
     return retval
+
+
+def xyd_dict_to_xyd_tuple(d):
+    """ Converts a dict of [x{}y{} : data] values to a list of tuples """
+    t = [tuple(list(map(int, s[1:].split("y"))) + ["Every"]) for s in d.keys()]
+    return t
 
 
 def main():
