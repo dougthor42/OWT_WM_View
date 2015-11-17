@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=E1101
+#   E1101 = Module X has no Y member
 """
 @name:          owt_wafer_map_viewer.py
 @created:       Mon Feb 23 14:55:23 2015
@@ -38,7 +40,7 @@ from wx.lib.floatcanvas import FloatCanvas
 
 # Package / Application
 try:
-    # Imports used for unittests
+    # Imports used by unit test runners
     from . import mask_constants
     from . import (__project_name__,
                    __version__,
@@ -321,7 +323,7 @@ class MainPanel(wx.Panel):
         self.mask_data.dia = wafer_info.dia
         self.read_mask_data(xyd)
 
-        self.stats_block= StatsBlock(self)
+        self.stats_block = StatsBlock(self)
 
         # Create the radius plots
         radius_sqrd_data = list(
@@ -379,16 +381,15 @@ class MainPanel(wx.Panel):
         self.wm_panel.xyd_dict = self.xyd_dict
         self.wm_panel._create_legend()
         self.wm_panel.draw_die()
-        self.wm_panel.draw_die_center()
         self.wm_panel.draw_wafer_objects()
         self.wm_panel.zoom_fill()
 
         self.stats_block.update_stats(self.xyd)
 
-        radius_sqrd_data = list(
+        radius_sqrd_data = [
            (self.wafer_info.die_size[0] * (self.wafer_info.center_xy[0] - die[0]))**2
            + (self.wafer_info.die_size[1] * (self.wafer_info.center_xy[1] - die[1]))**2
-           for die in self.xyd)
+           for die in self.xyd]
         new_radius_data = list(math.sqrt(item) for item in radius_sqrd_data)
         self.radius_plots.update(new_radius_data)
 
